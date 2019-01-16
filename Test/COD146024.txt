@@ -1,0 +1,79 @@
+OBJECT Codeunit 146024 Test_DotNet_Uri
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=Test,W1,All;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    TestPermissions=Disabled;
+    OnRun=BEGIN
+            // [FEATURE] [DotNet] [UT] [URI]
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      Assert@1000 : Codeunit 130000;
+      DotNet_Uri@1001 : Codeunit 3024;
+
+    [Test]
+    PROCEDURE EscapeAndUnescapeDataString@1();
+    VAR
+      Text@1000 : Text;
+      EscapedText@1001 : Text;
+    BEGIN
+      // [GIVEN] A Url
+      Text := 'http://<some%url.com>';
+      // [WHEN] EscapeDataString is called on that url
+      // [THEN] The url is escaped
+      EscapedText := 'http%3A%2F%2F%3Csome%25url.com%3E';
+      Assert.AreEqual(EscapedText,DotNet_Uri.EscapeDataString(Text),'EscapeDataString fails');
+      Assert.AreEqual(Text,DotNet_Uri.UnescapeDataString(EscapedText),'UnescapeDataString fails');
+    END;
+
+    [Test]
+    PROCEDURE VerifyHttpScheme@2();
+    BEGIN
+      // [GIVEN] A Url
+      DotNet_Uri.Init('http://microsoft.com');
+
+      // [THEN] The scheme should be 'http'
+      Assert.AreEqual('http',DotNet_Uri.Scheme,'Scheme fails');
+    END;
+
+    [Test]
+    PROCEDURE VerifyHttpsScheme@4();
+    BEGIN
+      // [GIVEN] A Url
+      DotNet_Uri.Init('https://microsoft.com');
+
+      // [THEN] The scheme should be 'http'
+      Assert.AreEqual('https',DotNet_Uri.Scheme,'Scheme fails');
+    END;
+
+    [Test]
+    PROCEDURE VerifySegments@3();
+    VAR
+      DotNet_Array@1000 : Codeunit 3000;
+    BEGIN
+      // [GIVEN] A Url
+
+      DotNet_Uri.Init('https://microsoft.com/Dynamics365/BusinessCentral');
+
+      // [THEN] The segments should be
+      DotNet_Uri.Segments(DotNet_Array);
+      Assert.AreEqual('/',DotNet_Array.GetValueAsText(0),'Segments fails');
+      Assert.AreEqual('Dynamics365/',DotNet_Array.GetValueAsText(1),'Segments fails');
+      Assert.AreEqual('BusinessCentral',DotNet_Array.GetValueAsText(2),'Segments fails');
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
